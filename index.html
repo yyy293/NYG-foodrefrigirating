@@ -12,6 +12,7 @@ body{
     background:#f4f4f4;
 }
 
+/* HEADER */
 header{
     background:#8B0000;
     color:white;
@@ -20,27 +21,46 @@ header{
     position:relative;
 }
 
-.brand{
-    position:absolute;
-    right:10px;
-    top:15px;
-    font-size:18px;
-    font-weight:bold;
-    direction:ltr;
-}
-
+/* HAMBURGER MENU */
 .menu-btn{
     position:absolute;
-    left:10px;
+    left:12px;
     top:10px;
+    width:40px;
+    height:30px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    cursor:pointer;
+}
+
+.menu-btn div{
+    height:4px;
     background:white;
-    color:#8B0000;
-    border:none;
-    padding:8px 10px;
+    border-radius:3px;
+}
+
+/* BRAND AREA */
+.brand-container{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.brand-container img{
+    width:40px;
+    height:40px;
     border-radius:6px;
+    object-fit:cover;
+}
+
+.brand-text{
+    font-size:20px;
     font-weight:bold;
 }
 
+/* CONTAINER */
 .container{
     max-width:900px;
     margin:15px auto;
@@ -65,9 +85,9 @@ button{
     color:white;
     border:none;
     font-weight:bold;
-    font-size:16px;
 }
 
+/* SIDEBAR */
 .sidebar{
     position:fixed;
     left:-100%;
@@ -100,31 +120,37 @@ button{
     margin-top:10px;
     font-weight:bold;
 }
-
-#loginBox{
-    overflow:hidden;
-    transition:0.3s;
-}
 </style>
 </head>
 
 <body>
 
 <header>
-<button class="menu-btn" onclick="toggleSidebar()">Admin</button>
-<div class="brand">New York Grill</div>
+
+<!-- HAMBURGER -->
+<div class="menu-btn" onclick="toggleSidebar()">
+<div></div>
+<div></div>
+<div></div>
+</div>
+
+<!-- BRAND -->
+<div class="brand-container">
+<img src="WhatsApp Image 2026-01-28 at 11.59.19 PM.jpeg" alt="logo">
+<div class="brand-text">New York Grill</div>
+</div>
+
 <h3>نظام التبريد الغذائي</h3>
+
 </header>
 
+<!-- MAIN -->
 <div class="container">
 
 <h3>إدخال بيانات الطعام</h3>
 
 <input id="worker" placeholder="اسم الموظف">
-
-<!-- 0 → infinite numbers only -->
 <input id="container" placeholder="رقم الحاوية (أرقام فقط)">
-
 <input id="type" placeholder="نوع الطعام">
 <input type="date" id="start">
 <input type="date" id="end">
@@ -141,20 +167,12 @@ button{
 <!-- SIDEBAR -->
 <div class="sidebar" id="side">
 
-<button onclick="toggleLoginBox()" style="width:100%;padding:10px;background:#8B0000;color:white;border:none;">
-Admin Login ⬇
-</button>
-
-<div id="loginBox">
-
 <h3>Admin Login</h3>
 
 <input type="password" id="pass">
 <button onclick="login()">Login</button>
 
 <div id="statusMsg"></div>
-
-</div>
 
 <hr>
 
@@ -172,26 +190,18 @@ const admins = [
 ];
 
 let loggedIn = false;
-let loginOpen = true;
 
-/* SIDEBAR */
+/* OPEN/CLOSE SIDEBAR */
 function toggleSidebar(){
 document.getElementById("side").classList.toggle("active");
 }
 
-/* COLLAPSE LOGIN */
-function toggleLoginBox(){
-let box = document.getElementById("loginBox");
-loginOpen = !loginOpen;
-box.style.display = loginOpen ? "block" : "none";
-}
-
-/* 🔢 0 → INFINITE VALIDATION */
+/* STRICT NUMBER ONLY */
 function isValidContainer(v){
 return /^[0-9]+$/.test(v);
 }
 
-/* RISK ENGINE */
+/* RISK SYSTEM */
 function risk(days){
 return days * 1.4;
 }
@@ -213,9 +223,8 @@ alert("اكمل البيانات");
 return;
 }
 
-/* MUST BE NUMBER ONLY */
 if(!isValidContainer(container)){
-alert("رقم الحاوية لازم يكون أرقام فقط (0 - ∞)");
+alert("رقم الحاوية لازم أرقام فقط");
 return;
 }
 
@@ -283,11 +292,6 @@ return;
 
 data.sort((a,b)=>b.score-a.score);
 
-if(data.length === 0){
-inbox.innerHTML = "<p>No data</p>";
-return;
-}
-
 inbox.innerHTML = "<h3>Inbox</h3>";
 
 data.forEach((r,i)=>{
@@ -307,7 +311,6 @@ Time: ${r.time}
 });
 }
 
-/* AUTO REFRESH */
 setInterval(()=>{
 if(loggedIn) loadInbox();
 },2000);
