@@ -1,0 +1,519 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New York Grill - نظام إدارة الثلاجة</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Tahoma, Arial, sans-serif;
+}
+
+body{
+    background:#f4f4f4;
+}
+
+header{
+    background:#8B0000;
+    color:white;
+    padding:20px;
+    position:relative;
+    text-align:center;
+}
+
+.logo{
+    position:absolute;
+    top:20px;
+    right:20px;
+    direction:ltr;
+    font-size:30px;
+    font-weight:bold;
+}
+
+.menu-btn{
+    position:absolute;
+    left:20px;
+    top:20px;
+    background:white;
+    color:#8B0000;
+    border:none;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.container{
+    max-width:850px;
+    margin:30px auto;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button.submit-btn{
+    width:100%;
+    padding:15px;
+    background:#8B0000;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button.submit-btn:hover{
+    background:#a00000;
+}
+
+#successMessage{
+    text-align:center;
+    color:green;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-380px;
+    width:380px;
+    height:100%;
+    background:white;
+    box-shadow:2px 0 10px rgba(0,0,0,0.3);
+    overflow-y:auto;
+    transition:0.3s;
+    padding:20px;
+    z-index:999;
+}
+
+.sidebar.active{
+    left:0;
+}
+
+.close-btn{
+    background:red;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-bottom:20px;
+}
+
+.inbox-item{
+    background:#f5f5f5;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+    border-right:5px solid #8B0000;
+}
+
+.admin-section{
+    display:none;
+}
+
+.login-btn{
+    background:#8B0000;
+    color:white;
+    border:none;
+    padding:12px;
+    width:100%;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.login-message{
+    text-align:center;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+h3{
+    margin-bottom:15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <button class="menu-btn" onclick="toggleSidebar()">
+        لوحة الإدارة
+    </button>
+
+    <div class="logo">
+        New York Grill
+    </div>
+
+    <h1>نظام إدارة ثلاجة الطعام</h1>
+</header>
+
+<div class="container">
+
+    <h2>إضافة طعام جديد</h2>
+
+    <div class="form-group">
+        <label>
+            اسم الشخص الذي قام بتغليف ووضع الطعام في الثلاجة
+        </label>
+
+        <input type="text" id="person" required>
+    </div>
+
+    <div class="form-group">
+        <label>
+            رقم الحاوية
+        </label>
+
+        <input
+            type="number"
+            id="container"
+            placeholder="1"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>
+            تاريخ التبريد
+        </label>
+
+        <input
+            type="date"
+            id="refrigerationDate"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>
+            نوع الطعام
+        </label>
+
+        <input
+            type="text"
+            id="foodType"
+            placeholder="مثال: لحم، دجاج، سلطة"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label>
+            الشخص المسؤول عن التخلص من الطعام (اختياري)
+        </label>
+
+        <input
+            type="text"
+            id="eradicator"
+        >
+    </div>
+
+    <div class="form-group">
+        <label>
+            تاريخ التخلص (اختياري)
+        </label>
+
+        <input
+            type="date"
+            id="eradicationDate"
+        >
+    </div>
+
+    <button
+        class="submit-btn"
+        onclick="submitFood()"
+    >
+        إدخال
+    </button>
+
+    <div id="successMessage"></div>
+
+</div>
+
+<div class="sidebar" id="sidebar">
+
+    <button
+        class="close-btn"
+        onclick="toggleSidebar()"
+    >
+        إغلاق
+    </button>
+
+    <div id="loginSection">
+
+        <h3>Admin Login</h3>
+
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="Password"
+        >
+
+        <button
+            class="login-btn"
+            onclick="adminLogin()"
+        >
+            Login
+        </button>
+
+        <div
+            class="login-message"
+            id="loginMessage"
+        ></div>
+
+    </div>
+
+    <div
+        class="admin-section"
+        id="adminSection"
+    >
+
+        <h3>Admin Inbox</h3>
+
+        <div id="inbox"></div>
+
+    </div>
+
+</div>
+
+<script>
+```
+```javascript
+const adminPasswords = [
+    "admin-123",
+    "admin_321",
+    "admin@2026",
+    "admin#2026"
+];
+
+function toggleSidebar() {
+    document
+        .getElementById("sidebar")
+        .classList.toggle("active");
+}
+
+function submitFood() {
+
+    const person =
+        document.getElementById("person").value.trim();
+
+    const container =
+        document.getElementById("container").value.trim();
+
+    const refrigerationDate =
+        document.getElementById("refrigerationDate").value;
+
+    const foodType =
+        document.getElementById("foodType").value.trim();
+
+    const eradicator =
+        document.getElementById("eradicator").value.trim();
+
+    const eradicationDate =
+        document.getElementById("eradicationDate").value;
+
+    if (
+        person === "" ||
+        container === "" ||
+        refrigerationDate === "" ||
+        foodType === ""
+    ) {
+        alert("يرجى تعبئة جميع الحقول المطلوبة.");
+        return;
+    }
+
+    const foodRecord = {
+        person: person,
+        container: container,
+        refrigerationDate: refrigerationDate,
+        foodType: foodType,
+        eradicator:
+            eradicator || "لم يتم التخلص بعد",
+        eradicationDate:
+            eradicationDate || "غير محدد",
+
+        createdAt:
+            new Date().toLocaleString("ar-EG")
+    };
+
+    let records =
+        JSON.parse(
+            localStorage.getItem("foodRecords")
+        ) || [];
+
+    records.push(foodRecord);
+
+    localStorage.setItem(
+        "foodRecords",
+        JSON.stringify(records)
+    );
+
+    document.getElementById(
+        "successMessage"
+    ).innerText =
+        "تم حفظ البيانات بنجاح.";
+
+    document.getElementById("person").value = "";
+    document.getElementById("container").value = "";
+    document.getElementById("refrigerationDate").value = "";
+    document.getElementById("foodType").value = "";
+    document.getElementById("eradicator").value = "";
+    document.getElementById("eradicationDate").value = "";
+
+    displayInbox();
+}
+
+function adminLogin() {
+
+    const password =
+        document.getElementById(
+            "adminPassword"
+        ).value;
+
+    if (
+        adminPasswords.includes(password)
+    ) {
+
+        document.getElementById(
+            "loginMessage"
+        ).innerText = "Login Successful";
+
+        document.getElementById(
+            "loginMessage"
+        ).style.color = "green";
+
+        document.getElementById(
+            "loginSection"
+        ).style.display = "none";
+
+        document.getElementById(
+            "adminSection"
+        ).style.display = "block";
+
+        displayInbox();
+
+    } else {
+
+        document.getElementById(
+            "loginMessage"
+        ).innerText = "Invalid Password";
+
+        document.getElementById(
+            "loginMessage"
+        ).style.color = "red";
+    }
+}
+
+function displayInbox() {
+
+    const inbox =
+        document.getElementById("inbox");
+
+    const records =
+        JSON.parse(
+            localStorage.getItem("foodRecords")
+        ) || [];
+
+    inbox.innerHTML = "";
+
+    if (records.length === 0) {
+
+        inbox.innerHTML =
+            "<p>لا توجد سجلات.</p>";
+
+        return;
+    }
+
+    records.forEach(function(record, index) {
+
+        inbox.innerHTML += `
+            <div class="inbox-item">
+
+                <strong>
+                السجل رقم ${index + 1}
+                </strong>
+
+                <br><br>
+
+                <b>الموظف:</b>
+                ${record.person}
+
+                <br>
+
+                <b>رقم الحاوية:</b>
+                ${record.container}
+
+                <br>
+
+                <b>تاريخ التبريد:</b>
+                ${record.refrigerationDate}
+
+                <br>
+
+                <b>نوع الطعام:</b>
+                ${record.foodType}
+
+                <br>
+
+                <b>المسؤول عن التخلص:</b>
+                ${record.eradicator}
+
+                <br>
+
+                <b>تاريخ التخلص:</b>
+                ${record.eradicationDate}
+
+                <br>
+
+                <b>وقت الإدخال:</b>
+                ${record.createdAt}
+
+            </div>
+        `;
+    });
+}
+```
+```html
+/* تحميل البيانات عند فتح الصفحة */
+
+window.onload = function () {
+    displayInbox();
+};
+
+</script>
+
+</body>
+</html>
+```
