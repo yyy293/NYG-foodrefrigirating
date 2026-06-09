@@ -6,14 +6,9 @@
 <title>New York Grill - نظام التبريد</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Tahoma;
-}
-
 body{
+    margin:0;
+    font-family:Tahoma;
     background:#f4f4f4;
 }
 
@@ -21,11 +16,11 @@ header{
     background:#8B0000;
     color:white;
     padding:20px;
-    text-align:center;
     position:relative;
+    text-align:center;
 }
 
-.logo{
+.brand{
     position:absolute;
     right:20px;
     top:20px;
@@ -34,14 +29,14 @@ header{
     direction:ltr;
 }
 
-.menu-btn{
+.btn{
     position:absolute;
     left:20px;
     top:20px;
     background:white;
     color:#8B0000;
     border:none;
-    padding:10px 15px;
+    padding:10px;
     border-radius:8px;
     cursor:pointer;
     font-weight:bold;
@@ -63,14 +58,14 @@ input{
     border:1px solid #ccc;
 }
 
-button.submit{
+button{
     width:100%;
     padding:12px;
     background:#8B0000;
     color:white;
     border:none;
-    font-weight:bold;
     cursor:pointer;
+    font-weight:bold;
 }
 
 .sidebar{
@@ -81,8 +76,8 @@ button.submit{
     height:100%;
     background:white;
     padding:15px;
-    box-shadow:2px 0 10px rgba(0,0,0,0.2);
     transition:0.3s;
+    box-shadow:2px 0 10px rgba(0,0,0,0.2);
 }
 
 .sidebar.active{
@@ -100,25 +95,15 @@ button.submit{
 .safe{color:green;}
 .warn{color:orange;}
 .danger{color:red;}
-
-#loginMsg{
-    margin-top:10px;
-    font-weight:bold;
-}
-#status{
-    margin-top:5px;
-    color:green;
-    font-weight:bold;
-}
 </style>
 </head>
 
 <body>
 
 <header>
-<button class="menu-btn" onclick="toggle()">لوحة الإدارة</button>
-<div class="logo">New York Grill</div>
-<h2>نظام إدارة التبريد الغذائي</h2>
+<button class="btn" onclick="toggle()">Admin</button>
+<div class="brand">New York Grill</div>
+<h2>نظام التبريد الغذائي</h2>
 </header>
 
 <div class="container">
@@ -127,13 +112,12 @@ button.submit{
 
 <input id="worker" placeholder="اسم الموظف">
 
-<!-- container must be number only -->
-<input id="container" type="number" placeholder="رقم الحاوية (أرقام فقط)">
+<!-- ONLY NUMBERS ALLOWED -->
+<input id="container" type="number" placeholder="رقم الحاوية">
 
-<input type="number" id="temp" placeholder="درجة الحرارة °C">
+<input id="type" placeholder="نوع الطعام">
 <input type="date" id="start">
 <input type="date" id="end">
-<input id="type" placeholder="نوع الطعام">
 
 <hr>
 
@@ -142,7 +126,7 @@ button.submit{
 <input id="executioner" placeholder="اسم منفذ الإعدام">
 <input type="date" id="execDate">
 
-<button class="submit" onclick="submitData()">إدخال</button>
+<button onclick="submit()">إدخال</button>
 
 </div>
 
@@ -154,8 +138,7 @@ button.submit{
 <input type="password" id="pass">
 <button onclick="login()">Login</button>
 
-<div id="loginMsg"></div>
-<div id="status"></div>
+<div id="msg"></div>
 
 <hr>
 
@@ -176,41 +159,44 @@ function toggle(){
 document.getElementById("side").classList.toggle("active");
 }
 
-/* 🔥 REFRIGERATION RISK ALGORITHM */
-function calcRisk(days, temp){
-
-let tempPenalty = 0;
-
-if(temp > 5) tempPenalty = 2;
-if(temp > 10) tempPenalty = 4;
-
-return (days * 1.3) + tempPenalty;
+/* VALIDATION: ONLY NUMBERS FOR CONTAINER */
+function isValidContainer(value){
+return /^[0-9]+$/.test(value);
 }
 
-/* SUBMIT */
-function submitData(){
+/* LOGIC */
+function calcRisk(days){
+return days * 1.5;
+}
 
-let w = document.getElementById("worker").value;
-let c = document.getElementById("container").value;
-let t = parseFloat(document.getElementById("temp").value);
-let s = document.getElementById("start").value;
-let e = document.getElementById("end").value;
+function submit(){
+
+let worker = document.getElementById("worker").value;
+let container = document.getElementById("container").value;
 let type = document.getElementById("type").value;
+let start = document.getElementById("start").value;
+let end = document.getElementById("end").value;
 
-let ex = document.getElementById("executioner").value;
-let exDate = document.getElementById("execDate").value;
+let exec = document.getElementById("executioner").value;
+let execDate = document.getElementById("execDate").value;
 
-/* REQUIRED FIELDS ONLY */
-if(!w || !c || !t || !s || !e || !type){
+/* REQUIRED CHECK */
+if(!worker || !container || !type || !start || !end){
 alert("اكمل البيانات المطلوبة");
 return;
 }
 
+/* CONTAINER VALIDATION */
+if(!isValidContainer(container)){
+alert("رقم الحاوية لازم يكون أرقام فقط");
+return;
+}
+
 let days = Math.max(1,
-Math.round((new Date(e)-new Date(s))/(1000*60*60*24))
+Math.round((new Date(end)-new Date(start))/(1000*60*60*24))
 );
 
-let risk = calcRisk(days, t);
+let risk = calcRisk(days);
 
 let status =
 risk < 3 ? "safe" :
@@ -218,19 +204,16 @@ risk < 6 ? "warn" :
 "danger";
 
 let record = {
-w,
-c,
-t,
-s,
-e,
+worker,
+container,
 type,
+start,
+end,
 days,
 risk,
 status,
-
-executioner: ex || "لم يتم التنفيذ",
-execDate: exDate || "لم يتم التنفيذ",
-
+executioner: exec || "لم يتم التنفيذ",
+execDate: execDate || "لم يتم التنفيذ",
 time: new Date().toLocaleString()
 };
 
@@ -241,30 +224,21 @@ localStorage.setItem("fridge", JSON.stringify(data));
 alert("تم الإدخال ✔");
 }
 
-/* LOGIN */
+/* LOGIN FIXED */
 function login(){
 
 let p = document.getElementById("pass").value;
 
-let msg = document.getElementById("loginMsg");
-let status = document.getElementById("status");
+if(!admins.includes(p)){
+document.getElementById("msg").innerText = "Wrong password ❌";
+document.getElementById("msg").style.color = "red";
+return;
+}
 
-if(admins.includes(p)){
-
-msg.style.color = "green";
-msg.innerText = "تم تسجيل الدخول ✔";
-
-status.innerText = "وضع الإدارة مفعل";
+document.getElementById("msg").innerText = "Login Successful ✔";
+document.getElementById("msg").style.color = "green";
 
 loadInbox();
-
-} else {
-
-msg.style.color = "red";
-msg.innerText = "كلمة المرور خطأ ❌";
-
-status.innerText = "";
-}
 }
 
 /* INBOX */
@@ -275,30 +249,28 @@ let data = JSON.parse(localStorage.getItem("fridge")) || [];
 
 data.sort((a,b)=>b.risk-a.risk);
 
-inbox.innerHTML = "<h3>سجل التبريد</h3>";
+inbox.innerHTML = "<h3>Inbox</h3>";
+
+if(data.length === 0){
+inbox.innerHTML += "<p>لا يوجد بيانات</p>";
+return;
+}
 
 data.forEach((r,i)=>{
-
 inbox.innerHTML += `
 <div class="card">
 <b>#${i+1}</b><br>
-الموظف: ${r.w}<br>
-الحاوية: ${r.c}<br>
+الموظف: ${r.worker}<br>
+الحاوية: ${r.container}<br>
 الطعام: ${r.type}<br>
 الأيام: ${r.days}<br>
-الحرارة: ${r.t}°C<br>
 الحالة: <b class="${r.status}">${r.status}</b><br>
 منفذ الإعدام: ${r.executioner}<br>
 تاريخ الإعدام: ${r.execDate}<br>
 الوقت: ${r.time}
 </div>
 `;
-
 });
-
-if(data.length === 0){
-inbox.innerHTML += "<p>لا يوجد سجلات</p>";
-}
 }
 
 </script>
