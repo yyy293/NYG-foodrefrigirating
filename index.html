@@ -15,45 +15,45 @@ body{
 header{
     background:#8B0000;
     color:white;
-    padding:20px;
-    position:relative;
+    padding:15px;
     text-align:center;
+    position:relative;
 }
 
 .brand{
     position:absolute;
-    right:20px;
-    top:20px;
-    font-size:26px;
+    right:10px;
+    top:15px;
+    font-size:18px;
     font-weight:bold;
     direction:ltr;
 }
 
-.btn{
+.menu-btn{
     position:absolute;
-    left:20px;
-    top:20px;
+    left:10px;
+    top:10px;
     background:white;
     color:#8B0000;
     border:none;
-    padding:10px;
-    border-radius:8px;
-    cursor:pointer;
+    padding:8px 10px;
+    border-radius:6px;
     font-weight:bold;
 }
 
 .container{
-    max-width:850px;
-    margin:30px auto;
+    max-width:900px;
+    margin:15px auto;
     background:white;
-    padding:25px;
-    border-radius:12px;
+    padding:15px;
+    border-radius:10px;
 }
 
 input{
     width:100%;
-    padding:10px;
+    padding:12px;
     margin:6px 0;
+    font-size:16px;
     border-radius:6px;
     border:1px solid #ccc;
 }
@@ -64,20 +64,20 @@ button{
     background:#8B0000;
     color:white;
     border:none;
-    cursor:pointer;
     font-weight:bold;
+    font-size:16px;
 }
 
 .sidebar{
     position:fixed;
-    left:-400px;
+    left:-100%;
     top:0;
-    width:400px;
+    width:100%;
     height:100%;
     background:white;
     padding:15px;
     transition:0.3s;
-    box-shadow:2px 0 10px rgba(0,0,0,0.2);
+    overflow-y:auto;
 }
 
 .sidebar.active{
@@ -88,22 +88,32 @@ button{
     background:#f9fafb;
     padding:10px;
     margin:10px 0;
-    border-radius:8px;
     border-right:5px solid #8B0000;
+    border-radius:8px;
 }
 
 .safe{color:green;}
 .warn{color:orange;}
 .danger{color:red;}
+
+#statusMsg{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+#loginBox{
+    overflow:hidden;
+    transition:0.3s;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<button class="btn" onclick="toggle()">Admin</button>
+<button class="menu-btn" onclick="toggleSidebar()">Admin</button>
 <div class="brand">New York Grill</div>
-<h2>نظام التبريد الغذائي</h2>
+<h3>نظام التبريد الغذائي</h3>
 </header>
 
 <div class="container">
@@ -112,33 +122,39 @@ button{
 
 <input id="worker" placeholder="اسم الموظف">
 
-<!-- ONLY NUMBERS ALLOWED -->
-<input id="container" type="number" placeholder="رقم الحاوية">
+<!-- 0 → infinite numbers only -->
+<input id="container" placeholder="رقم الحاوية (أرقام فقط)">
 
 <input id="type" placeholder="نوع الطعام">
 <input type="date" id="start">
 <input type="date" id="end">
 
-<hr>
-
-<h4>بيانات الإعدام (اختياري)</h4>
+<h4>الإعدام (اختياري)</h4>
 
 <input id="executioner" placeholder="اسم منفذ الإعدام">
 <input type="date" id="execDate">
 
-<button onclick="submit()">إدخال</button>
+<button onclick="submitData()">إدخال</button>
 
 </div>
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="side">
 
+<button onclick="toggleLoginBox()" style="width:100%;padding:10px;background:#8B0000;color:white;border:none;">
+Admin Login ⬇
+</button>
+
+<div id="loginBox">
+
 <h3>Admin Login</h3>
 
 <input type="password" id="pass">
 <button onclick="login()">Login</button>
 
-<div id="msg"></div>
+<div id="statusMsg"></div>
+
+</div>
 
 <hr>
 
@@ -155,21 +171,33 @@ const admins = [
 "admin#2026"
 ];
 
-function toggle(){
+let loggedIn = false;
+let loginOpen = true;
+
+/* SIDEBAR */
+function toggleSidebar(){
 document.getElementById("side").classList.toggle("active");
 }
 
-/* VALIDATION: ONLY NUMBERS FOR CONTAINER */
-function isValidContainer(value){
-return /^[0-9]+$/.test(value);
+/* COLLAPSE LOGIN */
+function toggleLoginBox(){
+let box = document.getElementById("loginBox");
+loginOpen = !loginOpen;
+box.style.display = loginOpen ? "block" : "none";
 }
 
-/* LOGIC */
-function calcRisk(days){
-return days * 1.5;
+/* 🔢 0 → INFINITE VALIDATION */
+function isValidContainer(v){
+return /^[0-9]+$/.test(v);
 }
 
-function submit(){
+/* RISK ENGINE */
+function risk(days){
+return days * 1.4;
+}
+
+/* SUBMIT */
+function submitData(){
 
 let worker = document.getElementById("worker").value;
 let container = document.getElementById("container").value;
@@ -180,15 +208,14 @@ let end = document.getElementById("end").value;
 let exec = document.getElementById("executioner").value;
 let execDate = document.getElementById("execDate").value;
 
-/* REQUIRED CHECK */
 if(!worker || !container || !type || !start || !end){
-alert("اكمل البيانات المطلوبة");
+alert("اكمل البيانات");
 return;
 }
 
-/* CONTAINER VALIDATION */
+/* MUST BE NUMBER ONLY */
 if(!isValidContainer(container)){
-alert("رقم الحاوية لازم يكون أرقام فقط");
+alert("رقم الحاوية لازم يكون أرقام فقط (0 - ∞)");
 return;
 }
 
@@ -196,11 +223,11 @@ let days = Math.max(1,
 Math.round((new Date(end)-new Date(start))/(1000*60*60*24))
 );
 
-let risk = calcRisk(days);
+let score = risk(days);
 
 let status =
-risk < 3 ? "safe" :
-risk < 6 ? "warn" :
+score < 3 ? "safe" :
+score < 6 ? "warn" :
 "danger";
 
 let record = {
@@ -210,7 +237,7 @@ type,
 start,
 end,
 days,
-risk,
+score,
 status,
 executioner: exec || "لم يتم التنفيذ",
 execDate: execDate || "لم يتم التنفيذ",
@@ -224,20 +251,22 @@ localStorage.setItem("fridge", JSON.stringify(data));
 alert("تم الإدخال ✔");
 }
 
-/* LOGIN FIXED */
+/* LOGIN */
 function login(){
 
 let p = document.getElementById("pass").value;
 
 if(!admins.includes(p)){
-document.getElementById("msg").innerText = "Wrong password ❌";
-document.getElementById("msg").style.color = "red";
+document.getElementById("statusMsg").innerText = "Wrong password ❌";
+document.getElementById("statusMsg").style.color = "red";
+loggedIn = false;
 return;
 }
 
-document.getElementById("msg").innerText = "Login Successful ✔";
-document.getElementById("msg").style.color = "green";
+document.getElementById("statusMsg").innerText = "Login Successful ✔";
+document.getElementById("statusMsg").style.color = "green";
 
+loggedIn = true;
 loadInbox();
 }
 
@@ -247,31 +276,41 @@ function loadInbox(){
 let inbox = document.getElementById("inbox");
 let data = JSON.parse(localStorage.getItem("fridge")) || [];
 
-data.sort((a,b)=>b.risk-a.risk);
-
-inbox.innerHTML = "<h3>Inbox</h3>";
-
-if(data.length === 0){
-inbox.innerHTML += "<p>لا يوجد بيانات</p>";
+if(!loggedIn){
+inbox.innerHTML = "<p>Login required</p>";
 return;
 }
+
+data.sort((a,b)=>b.score-a.score);
+
+if(data.length === 0){
+inbox.innerHTML = "<p>No data</p>";
+return;
+}
+
+inbox.innerHTML = "<h3>Inbox</h3>";
 
 data.forEach((r,i)=>{
 inbox.innerHTML += `
 <div class="card">
 <b>#${i+1}</b><br>
-الموظف: ${r.worker}<br>
-الحاوية: ${r.container}<br>
-الطعام: ${r.type}<br>
-الأيام: ${r.days}<br>
-الحالة: <b class="${r.status}">${r.status}</b><br>
-منفذ الإعدام: ${r.executioner}<br>
-تاريخ الإعدام: ${r.execDate}<br>
-الوقت: ${r.time}
+Worker: ${r.worker}<br>
+Container: ${r.container}<br>
+Food: ${r.type}<br>
+Days: ${r.days}<br>
+Status: <b class="${r.status}">${r.status}</b><br>
+Executioner: ${r.executioner}<br>
+Execution Date: ${r.execDate}<br>
+Time: ${r.time}
 </div>
 `;
 });
 }
+
+/* AUTO REFRESH */
+setInterval(()=>{
+if(loggedIn) loadInbox();
+},2000);
 
 </script>
 
