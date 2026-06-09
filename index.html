@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New York Grill</title>
+<title>New York Grill - نظام التبريد</title>
 
 <style>
 body{
@@ -12,7 +12,7 @@ body{
     background:#f4f4f4;
 }
 
-/* HEADER REBUILT بالكامل */
+/* HEADER */
 header{
     background:#8B0000;
     color:white;
@@ -22,13 +22,12 @@ header{
     padding:10px 15px;
 }
 
-/* HAMBURGER */
 .menu-btn{
     width:35px;
-    cursor:pointer;
     display:flex;
     flex-direction:column;
     gap:5px;
+    cursor:pointer;
 }
 
 .menu-btn div{
@@ -37,16 +36,13 @@ header{
     border-radius:3px;
 }
 
-/* BRAND CENTER */
 .brand{
     display:flex;
     align-items:center;
     gap:10px;
     font-weight:bold;
-    font-size:18px;
 }
 
-/* LOGO */
 .brand img{
     width:40px;
     height:40px;
@@ -67,6 +63,7 @@ input{
     width:100%;
     padding:12px;
     margin:6px 0;
+    font-size:16px;
 }
 
 button{
@@ -117,14 +114,12 @@ button{
 
 <header>
 
-<!-- MENU -->
 <div class="menu-btn" onclick="toggleSidebar()">
 <div></div>
 <div></div>
 <div></div>
 </div>
 
-<!-- LOGO + BRAND -->
 <div class="brand">
 <img src="WhatsApp%20Image%202026-01-28%20at%2011.59.19%20PM.jpeg">
 New York Grill
@@ -137,10 +132,12 @@ New York Grill
 <h3>إدخال بيانات الطعام</h3>
 
 <input id="worker" placeholder="اسم الموظف">
+
 <input id="container" placeholder="رقم الحاوية (أرقام فقط)">
 <input id="type" placeholder="نوع الطعام">
-<input type="date" id="start">
-<input type="date" id="end">
+
+<!-- ONLY ONE DATE NOW -->
+<input type="date" id="refrigerationDate">
 
 <h4>الإعدام (اختياري)</h4>
 <input id="executioner" placeholder="اسم منفذ الإعدام">
@@ -182,7 +179,7 @@ function toggleSidebar(){
 document.getElementById("side").classList.toggle("active");
 }
 
-/* VALIDATE */
+/* VALIDATION */
 function isValidContainer(v){
 return /^[0-9]+$/.test(v);
 }
@@ -198,13 +195,12 @@ function submitData(){
 let worker = document.getElementById("worker").value;
 let container = document.getElementById("container").value;
 let type = document.getElementById("type").value;
-let start = document.getElementById("start").value;
-let end = document.getElementById("end").value;
+let refrigerationDate = document.getElementById("refrigerationDate").value;
 
 let exec = document.getElementById("executioner").value;
 let execDate = document.getElementById("execDate").value;
 
-if(!worker || !container || !type || !start || !end){
+if(!worker || !container || !type || !refrigerationDate){
 alert("اكمل البيانات");
 return;
 }
@@ -214,9 +210,7 @@ alert("رقم الحاوية لازم أرقام فقط");
 return;
 }
 
-let days = Math.max(1,
-Math.round((new Date(end)-new Date(start))/(1000*60*60*24))
-);
+let days = 1; // simplified (single date system)
 
 let score = risk(days);
 
@@ -228,8 +222,13 @@ score < 6 ? "warn" :
 let data = JSON.parse(localStorage.getItem("fridge")) || [];
 
 data.push({
-worker,container,type,start,end,
-days,score,status,
+worker,
+container,
+type,
+refrigerationDate,
+days,
+score,
+status,
 executioner: exec || "لم يتم التنفيذ",
 execDate: execDate || "لم يتم التنفيذ",
 time:new Date().toLocaleString()
@@ -270,8 +269,6 @@ inbox.innerHTML = "<p>Login required</p>";
 return;
 }
 
-data.sort((a,b)=>b.score-a.score);
-
 inbox.innerHTML = "<h3>Inbox</h3>";
 
 data.forEach((r,i)=>{
@@ -281,7 +278,7 @@ inbox.innerHTML += `
 Worker: ${r.worker}<br>
 Container: ${r.container}<br>
 Food: ${r.type}<br>
-Days: ${r.days}<br>
+Refrigeration Date: ${r.refrigerationDate}<br>
 Status: <b class="${r.status}">${r.status}</b><br>
 Executioner: ${r.executioner}<br>
 Execution Date: ${r.execDate}<br>
