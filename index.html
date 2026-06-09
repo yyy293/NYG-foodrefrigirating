@@ -17,7 +17,6 @@ body{
     background:#f4f4f4;
 }
 
-/* HEADER */
 header{
     background:#8B0000;
     color:white;
@@ -48,7 +47,6 @@ header{
     font-weight:bold;
 }
 
-/* MAIN */
 .container{
     max-width:850px;
     margin:30px auto;
@@ -57,7 +55,6 @@ header{
     border-radius:12px;
 }
 
-/* INPUTS */
 input{
     width:100%;
     padding:10px;
@@ -76,7 +73,6 @@ button.submit{
     cursor:pointer;
 }
 
-/* SIDEBAR */
 .sidebar{
     position:fixed;
     left:-400px;
@@ -120,7 +116,7 @@ button.submit{
 <body>
 
 <header>
-<button class="menu-btn" onclick="toggle()">Admin</button>
+<button class="menu-btn" onclick="toggle()">لوحة الإدارة</button>
 <div class="logo">New York Grill</div>
 <h2>نظام إدارة التبريد الغذائي</h2>
 </header>
@@ -130,11 +126,21 @@ button.submit{
 <h3>إدخال بيانات الطعام</h3>
 
 <input id="worker" placeholder="اسم الموظف">
-<input id="container" placeholder="رقم الحاوية">
+
+<!-- container must be number only -->
+<input id="container" type="number" placeholder="رقم الحاوية (أرقام فقط)">
+
 <input type="number" id="temp" placeholder="درجة الحرارة °C">
 <input type="date" id="start">
 <input type="date" id="end">
 <input id="type" placeholder="نوع الطعام">
+
+<hr>
+
+<h4>بيانات الإعدام (اختياري)</h4>
+
+<input id="executioner" placeholder="اسم منفذ الإعدام">
+<input type="date" id="execDate">
 
 <button class="submit" onclick="submitData()">إدخال</button>
 
@@ -170,7 +176,7 @@ function toggle(){
 document.getElementById("side").classList.toggle("active");
 }
 
-/* 🔥 REAL REFRIGERATION RISK ALGORITHM */
+/* 🔥 REFRIGERATION RISK ALGORITHM */
 function calcRisk(days, temp){
 
 let tempPenalty = 0;
@@ -181,7 +187,7 @@ if(temp > 10) tempPenalty = 4;
 return (days * 1.3) + tempPenalty;
 }
 
-/* SUBMIT (WORKER SIDE) */
+/* SUBMIT */
 function submitData(){
 
 let w = document.getElementById("worker").value;
@@ -191,8 +197,12 @@ let s = document.getElementById("start").value;
 let e = document.getElementById("end").value;
 let type = document.getElementById("type").value;
 
+let ex = document.getElementById("executioner").value;
+let exDate = document.getElementById("execDate").value;
+
+/* REQUIRED FIELDS ONLY */
 if(!w || !c || !t || !s || !e || !type){
-alert("اكمل البيانات");
+alert("اكمل البيانات المطلوبة");
 return;
 }
 
@@ -208,18 +218,30 @@ risk < 6 ? "warn" :
 "danger";
 
 let record = {
-w,c,t,s,e,type,days,risk,status,
-time:new Date().toLocaleString()
+w,
+c,
+t,
+s,
+e,
+type,
+days,
+risk,
+status,
+
+executioner: ex || "لم يتم التنفيذ",
+execDate: exDate || "لم يتم التنفيذ",
+
+time: new Date().toLocaleString()
 };
 
 let data = JSON.parse(localStorage.getItem("fridge")) || [];
 data.push(record);
 localStorage.setItem("fridge", JSON.stringify(data));
 
-alert("تم الإرسال ✔");
+alert("تم الإدخال ✔");
 }
 
-/* 🔐 FIXED LOGIN */
+/* LOGIN */
 function login(){
 
 let p = document.getElementById("pass").value;
@@ -230,22 +252,22 @@ let status = document.getElementById("status");
 if(admins.includes(p)){
 
 msg.style.color = "green";
-msg.innerText = "Login Successful ✔";
+msg.innerText = "تم تسجيل الدخول ✔";
 
-status.innerText = "Admin Mode Active";
+status.innerText = "وضع الإدارة مفعل";
 
 loadInbox();
 
 } else {
 
 msg.style.color = "red";
-msg.innerText = "Wrong Password ❌";
+msg.innerText = "كلمة المرور خطأ ❌";
 
 status.innerText = "";
 }
 }
 
-/* 📦 INBOX */
+/* INBOX */
 function loadInbox(){
 
 let inbox = document.getElementById("inbox");
@@ -253,27 +275,29 @@ let data = JSON.parse(localStorage.getItem("fridge")) || [];
 
 data.sort((a,b)=>b.risk-a.risk);
 
-inbox.innerHTML = "<h3>Inbox</h3>";
+inbox.innerHTML = "<h3>سجل التبريد</h3>";
 
 data.forEach((r,i)=>{
 
 inbox.innerHTML += `
 <div class="card">
 <b>#${i+1}</b><br>
-Worker: ${r.w}<br>
-Container: ${r.c}<br>
-Food: ${r.type}<br>
-Days: ${r.days}<br>
-Temp: ${r.t}°C<br>
-Risk: <b class="${r.status}">${r.status}</b><br>
-Time: ${r.time}
+الموظف: ${r.w}<br>
+الحاوية: ${r.c}<br>
+الطعام: ${r.type}<br>
+الأيام: ${r.days}<br>
+الحرارة: ${r.t}°C<br>
+الحالة: <b class="${r.status}">${r.status}</b><br>
+منفذ الإعدام: ${r.executioner}<br>
+تاريخ الإعدام: ${r.execDate}<br>
+الوقت: ${r.time}
 </div>
 `;
 
 });
 
 if(data.length === 0){
-inbox.innerHTML += "<p>No records yet</p>";
+inbox.innerHTML += "<p>لا يوجد سجلات</p>";
 }
 }
 
