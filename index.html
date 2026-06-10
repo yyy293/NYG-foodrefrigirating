@@ -6,33 +6,35 @@
 <title>New York Grill - نظام التبريد</title>
 
 <style>
-body{
+*{
+    box-sizing:border-box;
     margin:0;
-    font-family:Tahoma;
+    padding:0;
+    font-family:Tahoma, Arial, sans-serif;
+}
+
+body{
     background:#f4f4f4;
 }
 
-/* HEADER */
 header{
     background:#8B0000;
     color:white;
+    padding:15px;
     display:flex;
-    align-items:center;
     justify-content:space-between;
-    padding:10px 15px;
+    align-items:center;
 }
 
-.menu-btn{
-    width:35px;
-    display:flex;
-    flex-direction:column;
-    gap:5px;
+.menu{
     cursor:pointer;
 }
 
-.menu-btn div{
+.menu div{
+    width:30px;
     height:4px;
     background:white;
+    margin:5px 0;
     border-radius:3px;
 }
 
@@ -40,51 +42,62 @@ header{
     display:flex;
     align-items:center;
     gap:10px;
-    font-weight:bold;
 }
 
 .brand img{
-    width:40px;
-    height:40px;
-    border-radius:6px;
+    width:45px;
+    height:45px;
+    border-radius:8px;
     object-fit:cover;
 }
 
-/* MAIN */
 .container{
     max-width:900px;
-    margin:15px auto;
+    margin:20px auto;
     background:white;
-    padding:15px;
-    border-radius:10px;
+    padding:20px;
+    border-radius:12px;
+}
+
+h2{
+    margin-bottom:15px;
 }
 
 input{
     width:100%;
     padding:12px;
-    margin:6px 0;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
     font-size:16px;
 }
 
 button{
     width:100%;
     padding:12px;
+    border:none;
+    border-radius:8px;
     background:#8B0000;
     color:white;
-    border:none;
+    font-size:16px;
+    cursor:pointer;
 }
 
-/* SIDEBAR */
+button:hover{
+    background:#a00000;
+}
+
 .sidebar{
     position:fixed;
-    left:-100%;
     top:0;
+    left:-100%;
     width:100%;
     height:100%;
     background:white;
-    padding:15px;
+    overflow:auto;
     transition:0.3s;
-    overflow-y:auto;
+    padding:20px;
+    z-index:999;
 }
 
 .sidebar.active{
@@ -92,18 +105,14 @@ button{
 }
 
 .card{
-    background:#f9fafb;
-    padding:10px;
+    background:#f8f8f8;
+    padding:15px;
     margin:10px 0;
     border-right:5px solid #8B0000;
-    border-radius:8px;
+    border-radius:10px;
 }
 
-.safe{color:green;}
-.warn{color:orange;}
-.danger{color:red;}
-
-#statusMsg{
+#message{
     margin-top:10px;
     font-weight:bold;
 }
@@ -114,48 +123,80 @@ button{
 
 <header>
 
-<div class="menu-btn" onclick="toggleSidebar()">
-<div></div>
-<div></div>
-<div></div>
+<div class="menu" onclick="toggleSidebar()">
+    <div></div>
+    <div></div>
+    <div></div>
 </div>
 
 <div class="brand">
-<img src="WhatsApp%20Image%202026-01-28%20at%2011.59.19%20PM.jpeg">
-New York Grill
+    <img src="WhatsApp Image 2026-01-28 at 11.59.19 PM.jpeg" alt="Logo">
+    <strong>New York Grill</strong>
 </div>
 
 </header>
 
 <div class="container">
 
-<h3>إدخال بيانات الطعام</h3>
+<h2>إدخال بيانات الطعام</h2>
 
-<input id="worker" placeholder="اسم الموظف">
+<input
+    type="text"
+    id="worker"
+    placeholder="اسم الموظف">
 
-<input id="container" placeholder="رقم الحاوية (أرقام فقط)">
-<input id="type" placeholder="نوع الطعام">
+<input
+    type="text"
+    id="container"
+    inputmode="numeric"
+    placeholder="رقم الحاوية (1،2،3...)">
 
-<!-- ONLY ONE DATE NOW -->
-<input type="date" id="refrigerationDate">
+<input
+    type="text"
+    id="food"
+    placeholder="نوع الطعام">
 
-<h4>الإعدام (اختياري)</h4>
-<input id="executioner" placeholder="اسم منفذ الإعدام">
-<input type="date" id="execDate">
+<input
+    type="date"
+    id="refrigerationDate">
 
-<button onclick="submitData()">إدخال</button>
+<h3>الإعدام (اختياري)</h3>
+
+<input
+    type="text"
+    id="executioner"
+    placeholder="اسم منفذ الإعدام">
+
+<input
+    type="date"
+    id="executionDate">
+
+<button onclick="submitData()">
+    إدخال
+</button>
 
 </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="side">
+<div class="sidebar" id="sidebar">
 
-<h3>Admin Login</h3>
+<h2>Admin Login</h2>
 
-<input type="password" id="pass">
-<button onclick="login()">Login</button>
+<input
+    type="password"
+    id="password"
+    placeholder="Password">
 
-<div id="statusMsg"></div>
+<button onclick="login()">
+    Login
+</button>
+
+<div id="message"></div>
+
+<br>
+
+<button onclick="exportCSV()">
+    Download CSV
+</button>
 
 <hr>
 
@@ -166,127 +207,262 @@ New York Grill
 <script>
 
 const admins = [
-"admin-123",
-"admin_321",
-"admin@2026",
-"admin#2026"
+    "aziz-123",
+    "moustafa-321",
+    "mom#2026",
+    "yassein@123"
 ];
 
 let loggedIn = false;
 
-/* SIDEBAR */
 function toggleSidebar(){
-document.getElementById("side").classList.toggle("active");
+    document
+        .getElementById("sidebar")
+        .classList.toggle("active");
 }
 
-/* VALIDATION */
-function isValidContainer(v){
-return /^[0-9]+$/.test(v);
+function validContainer(number){
+
+    return /^[1-9][0-9]*$/.test(number);
 }
 
-/* RISK */
-function risk(days){
-return days * 1.4;
-}
-
-/* SUBMIT */
 function submitData(){
 
-let worker = document.getElementById("worker").value;
-let container = document.getElementById("container").value;
-let type = document.getElementById("type").value;
-let refrigerationDate = document.getElementById("refrigerationDate").value;
+    const worker =
+        document.getElementById("worker").value.trim();
 
-let exec = document.getElementById("executioner").value;
-let execDate = document.getElementById("execDate").value;
+    const container =
+        document.getElementById("container").value.trim();
 
-if(!worker || !container || !type || !refrigerationDate){
-alert("اكمل البيانات");
-return;
+    const food =
+        document.getElementById("food").value.trim();
+
+    const refrigerationDate =
+        document.getElementById("refrigerationDate").value;
+
+    const executioner =
+        document.getElementById("executioner").value.trim();
+
+    const executionDate =
+        document.getElementById("executionDate").value;
+
+    if(
+        worker === "" ||
+        container === "" ||
+        food === "" ||
+        refrigerationDate === ""
+    ){
+        alert("يرجى تعبئة جميع الحقول المطلوبة");
+        return;
+    }
+
+    if(!validContainer(container)){
+        alert("رقم الحاوية يجب أن يبدأ من 1 ويحتوي على أرقام فقط");
+        return;
+    }
+
+    let records =
+        JSON.parse(
+            localStorage.getItem("fridgeRecords")
+        ) || [];
+
+    records.push({
+
+        worker: worker,
+
+        container: container,
+
+        food: food,
+
+        refrigerationDate: refrigerationDate,
+                executioner:
+            executioner || "غير محدد",
+
+        executionDate:
+            executionDate || "غير محدد",
+
+        createdAt:
+            new Date().toLocaleString("ar-EG")
+    });
+
+    localStorage.setItem(
+        "fridgeRecords",
+        JSON.stringify(records)
+    );
+
+    alert("تم حفظ البيانات بنجاح");
+
+    document.getElementById("worker").value = "";
+    document.getElementById("container").value = "";
+    document.getElementById("food").value = "";
+    document.getElementById("refrigerationDate").value = "";
+    document.getElementById("executioner").value = "";
+    document.getElementById("executionDate").value = "";
+
+    if(loggedIn){
+        displayInbox();
+    }
 }
 
-if(!isValidContainer(container)){
-alert("رقم الحاوية لازم أرقام فقط");
-return;
-}
-
-let days = 1; // simplified (single date system)
-
-let score = risk(days);
-
-let status =
-score < 3 ? "safe" :
-score < 6 ? "warn" :
-"danger";
-
-let data = JSON.parse(localStorage.getItem("fridge")) || [];
-
-data.push({
-worker,
-container,
-type,
-refrigerationDate,
-days,
-score,
-status,
-executioner: exec || "لم يتم التنفيذ",
-execDate: execDate || "لم يتم التنفيذ",
-time:new Date().toLocaleString()
-});
-
-localStorage.setItem("fridge", JSON.stringify(data));
-
-alert("تم الإدخال ✔");
-}
-
-/* LOGIN */
 function login(){
 
-let p = document.getElementById("pass").value;
+    const password =
+        document.getElementById("password").value;
 
-if(!admins.includes(p)){
-document.getElementById("statusMsg").innerText = "Wrong password ❌";
-document.getElementById("statusMsg").style.color = "red";
-loggedIn = false;
-return;
+    if(admins.includes(password)){
+
+        loggedIn = true;
+
+        document.getElementById("message").innerText =
+            "Login Successful";
+
+        document.getElementById("message").style.color =
+            "green";
+
+        displayInbox();
+
+    }else{
+
+        loggedIn = false;
+
+        document.getElementById("message").innerText =
+            "Wrong Password";
+
+        document.getElementById("message").style.color =
+            "red";
+    }
 }
 
-document.getElementById("statusMsg").innerText = "Login Successful ✔";
-document.getElementById("statusMsg").style.color = "green";
+function displayInbox(){
 
-loggedIn = true;
-loadInbox();
+    const inbox =
+        document.getElementById("inbox");
+
+    const records =
+        JSON.parse(
+            localStorage.getItem("fridgeRecords")
+        ) || [];
+
+    inbox.innerHTML = "<h2>Admin Inbox</h2>";
+
+    if(records.length === 0){
+
+        inbox.innerHTML +=
+            "<p>لا توجد سجلات.</p>";
+
+        return;
+    }
+
+    records.forEach(function(record,index){
+
+        inbox.innerHTML += `
+            <div class="card">
+
+                <strong>
+                    سجل رقم ${index + 1}
+                </strong>
+
+                <br><br>
+
+                <b>الموظف:</b>
+                ${record.worker}
+
+                <br>
+
+                <b>رقم الحاوية:</b>
+                ${record.container}
+
+                <br>
+
+                <b>نوع الطعام:</b>
+                ${record.food}
+
+                <br>
+
+                <b>تاريخ التبريد:</b>
+                ${record.refrigerationDate}
+
+                <br>
+
+                <b>منفذ الإعدام:</b>
+                ${record.executioner}
+
+                <br>
+
+                <b>تاريخ الإعدام:</b>
+                ${record.executionDate}
+
+                <br>
+
+                <b>وقت الإدخال:</b>
+                ${record.createdAt}
+
+            </div>
+        `;
+    });
 }
 
-/* INBOX */
-function loadInbox(){
+function exportCSV(){
 
-let inbox = document.getElementById("inbox");
-let data = JSON.parse(localStorage.getItem("fridge")) || [];
+    const records =
+        JSON.parse(
+            localStorage.getItem("fridgeRecords")
+        ) || [];
 
-if(!loggedIn){
-inbox.innerHTML = "<p>Login required</p>";
-return;
+    if(records.length === 0){
+
+        alert("لا توجد بيانات للتصدير");
+
+        return;
+    }
+
+    let csv =
+        "Employee,Container Number,Food Type,Refrigeration Date,Executioner,Execution Date,Entry Time\n";
+
+    records.forEach(function(record){
+
+        csv +=
+            `"${record.worker}",` +
+            `"${record.container}",` +
+            `"${record.food}",` +
+            `"${record.refrigerationDate}",` +
+            `"${record.executioner}",` +
+            `"${record.executionDate}",` +
+            `"${record.createdAt}"\n`;
+    });
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:"text/csv;charset=utf-8;"
+            }
+        );
+
+    const link =
+        document.createElement("a");
+
+    link.href =
+        URL.createObjectURL(blob);
+
+    link.download =
+        "NewYorkGrill_Refrigerator_Records.csv";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
 }
 
-inbox.innerHTML = "<h3>Inbox</h3>";
+setInterval(function(){
 
-data.forEach((r,i)=>{
-inbox.innerHTML += `
-<div class="card">
-<b>#${i+1}</b><br>
-Worker: ${r.worker}<br>
-Container: ${r.container}<br>
-Food: ${r.type}<br>
-Refrigeration Date: ${r.refrigerationDate}<br>
-Status: <b class="${r.status}">${r.status}</b><br>
-Executioner: ${r.executioner}<br>
-Execution Date: ${r.execDate}<br>
-Time: ${r.time}
-</div>
-`;
-});
-}
+    if(loggedIn){
+
+        displayInbox();
+    }
+
+},2000);
 
 </script>
 
