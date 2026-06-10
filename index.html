@@ -112,31 +112,31 @@ button:hover{
     border-radius:10px;
 }
 
-#message{
-    margin-top:10px;
-    font-weight:bold;
+/* ألوان مخصصة لأزرار التحكم الجديدة */
+.cancel-btn {
+    background: #6c757d;
+    margin-top: 10px;
 }
-
-/* ستايل إضافي لزر الإغلاق وزر الخروج */
-.close-btn {
-    background: #555;
-    margin-bottom: 20px;
-}
-.close-btn:hover {
-    background: #333;
+.cancel-btn:hover {
+    background: #5a6268;
 }
 .logout-btn {
-    background: #333;
+    background: #212529;
     margin-top: 10px;
 }
 .logout-btn:hover {
-    background: #111;
+    background: #000000;
 }
 .export-btn {
-    background: #2e7d32;
+    background: #198754;
 }
 .export-btn:hover {
-    background: #1b5e20;
+    background: #157347;
+}
+
+#message{
+    margin-top:10px;
+    font-weight:bold;
 }
 </style>
 </head>
@@ -200,11 +200,10 @@ button:hover{
 </div>
 
 <div class="sidebar" id="sidebar">
-    
-    <button class="close-btn" onclick="toggleSidebar()">إغلاق القائمة ✕</button>
 
     <div id="loginSection">
         <h2>Admin Login</h2>
+        
         <input
             type="password"
             id="password"
@@ -213,21 +212,26 @@ button:hover{
         <button onclick="login()">
             Login
         </button>
+
+        <button class="cancel-btn" onclick="toggleSidebar()">
+            إلغاء والعودة للرئيسية ✕
+        </button>
+
         <div id="message"></div>
     </div>
 
     <div id="adminSection" style="display: none;">
-        <h2>لوحة التحكم بالبيانات</h2>
-        
+        <h2>لوحة تحكم الإدارة</h2>
+
         <button class="export-btn" onclick="exportCSV()">
             Download CSV
         </button>
 
         <button class="logout-btn" onclick="logout()">
-            تسجيل الخروج (Logout)
+            تسجيل الخروج والرجوع للرئيسية ✕
         </button>
 
-        <hr style="margin: 20px 0;">
+        <hr style="margin:20px 0;">
 
         <div id="inbox"></div>
     </div>
@@ -306,7 +310,6 @@ function login(){
     if(admins.includes(password)){
         loggedIn = true;
         
-        // تنظيف رسائل الخطأ وتحويل العرض لقسم الأدمن
         document.getElementById("message").innerText = "";
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminSection").style.display = "block";
@@ -319,20 +322,20 @@ function login(){
     }
 }
 
-// دالة تسجيل الخروج والعودة للحالة الافتراضية
+// دالة تسجيل الخروج وإعادة تهيئة القائمة بالكامل
 function logout(){
     loggedIn = false;
     
-    // إعادة تصفير الحقول والقوائم
+    // تصفير الحقول
     document.getElementById("password").value = "";
     document.getElementById("message").innerText = "";
     document.getElementById("inbox").innerHTML = "";
     
-    // تبديل الأقسام الظاهرة
+    // إرجاع واجهة تسجيل الدخول وإخفاء بيانات الأدمن
     document.getElementById("loginSection").style.display = "block";
     document.getElementById("adminSection").style.display = "none";
     
-    // إغلاق السايد بار تلقائياً
+    // إغلاق القائمة تلقائياً والرجوع لصفحة إدخال البيانات للعمال
     toggleSidebar();
 }
 
