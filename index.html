@@ -116,6 +116,28 @@ button:hover{
     margin-top:10px;
     font-weight:bold;
 }
+
+/* ستايل إضافي لزر الإغلاق وزر الخروج */
+.close-btn {
+    background: #555;
+    margin-bottom: 20px;
+}
+.close-btn:hover {
+    background: #333;
+}
+.logout-btn {
+    background: #333;
+    margin-top: 10px;
+}
+.logout-btn:hover {
+    background: #111;
+}
+.export-btn {
+    background: #2e7d32;
+}
+.export-btn:hover {
+    background: #1b5e20;
+}
 </style>
 </head>
 
@@ -178,29 +200,37 @@ button:hover{
 </div>
 
 <div class="sidebar" id="sidebar">
+    
+    <button class="close-btn" onclick="toggleSidebar()">إغلاق القائمة ✕</button>
 
-<h2>Admin Login</h2>
+    <div id="loginSection">
+        <h2>Admin Login</h2>
+        <input
+            type="password"
+            id="password"
+            placeholder="Password">
 
-<input
-    type="password"
-    id="password"
-    placeholder="Password">
+        <button onclick="login()">
+            Login
+        </button>
+        <div id="message"></div>
+    </div>
 
-<button onclick="login()">
-    Login
-</button>
+    <div id="adminSection" style="display: none;">
+        <h2>لوحة التحكم بالبيانات</h2>
+        
+        <button class="export-btn" onclick="exportCSV()">
+            Download CSV
+        </button>
 
-<div id="message"></div>
+        <button class="logout-btn" onclick="logout()">
+            تسجيل الخروج (Logout)
+        </button>
 
-<br>
+        <hr style="margin: 20px 0;">
 
-<button onclick="exportCSV()">
-    Download CSV
-</button>
-
-<hr>
-
-<div id="inbox"></div>
+        <div id="inbox"></div>
+    </div>
 
 </div>
 
@@ -222,36 +252,18 @@ function toggleSidebar(){
 }
 
 function validContainer(number){
-
     return /^[1-9][0-9]*$/.test(number);
 }
 
 function submitData(){
+    const worker = document.getElementById("worker").value.trim();
+    const container = document.getElementById("container").value.trim();
+    const food = document.getElementById("food").value.trim();
+    const refrigerationDate = document.getElementById("refrigerationDate").value;
+    const executioner = document.getElementById("executioner").value.trim();
+    const executionDate = document.getElementById("executionDate").value;
 
-    const worker =
-        document.getElementById("worker").value.trim();
-
-    const container =
-        document.getElementById("container").value.trim();
-
-    const food =
-        document.getElementById("food").value.trim();
-
-    const refrigerationDate =
-        document.getElementById("refrigerationDate").value;
-
-    const executioner =
-        document.getElementById("executioner").value.trim();
-
-    const executionDate =
-        document.getElementById("executionDate").value;
-
-    if(
-        worker === "" ||
-        container === "" ||
-        food === "" ||
-        refrigerationDate === ""
-    ){
+    if(worker === "" || container === "" || food === "" || refrigerationDate === ""){
         alert("يرجى تعبئة جميع الحقول المطلوبة");
         return;
     }
@@ -261,35 +273,19 @@ function submitData(){
         return;
     }
 
-    let records =
-        JSON.parse(
-            localStorage.getItem("fridgeRecords")
-        ) || [];
+    let records = JSON.parse(localStorage.getItem("fridgeRecords")) || [];
 
     records.push({
-
         worker: worker,
-
         container: container,
-
         food: food,
-
         refrigerationDate: refrigerationDate,
-                executioner:
-            executioner || "غير محدد",
-
-        executionDate:
-            executionDate || "غير محدد",
-
-        createdAt:
-            new Date().toLocaleString("ar-EG")
+        executioner: executioner || "غير محدد",
+        executionDate: executionDate || "غير محدد",
+        createdAt: new Date().toLocaleString("ar-EG")
     });
 
-    localStorage.setItem(
-        "fridgeRecords",
-        JSON.stringify(records)
-    );
-
+    localStorage.setItem("fridgeRecords", JSON.stringify(records));
     alert("تم حفظ البيانات بنجاح");
 
     document.getElementById("worker").value = "";
@@ -305,163 +301,96 @@ function submitData(){
 }
 
 function login(){
-
-    const password =
-        document.getElementById("password").value;
+    const password = document.getElementById("password").value;
 
     if(admins.includes(password)){
-
         loggedIn = true;
-
-        document.getElementById("message").innerText =
-            "Login Successful";
-
-        document.getElementById("message").style.color =
-            "green";
+        
+        // تنظيف رسائل الخطأ وتحويل العرض لقسم الأدمن
+        document.getElementById("message").innerText = "";
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("adminSection").style.display = "block";
 
         displayInbox();
-
     }else{
-
         loggedIn = false;
-
-        document.getElementById("message").innerText =
-            "Wrong Password";
-
-        document.getElementById("message").style.color =
-            "red";
+        document.getElementById("message").innerText = "Wrong Password";
+        document.getElementById("message").style.color = "red";
     }
 }
 
+// دالة تسجيل الخروج والعودة للحالة الافتراضية
+function logout(){
+    loggedIn = false;
+    
+    // إعادة تصفير الحقول والقوائم
+    document.getElementById("password").value = "";
+    document.getElementById("message").innerText = "";
+    document.getElementById("inbox").innerHTML = "";
+    
+    // تبديل الأقسام الظاهرة
+    document.getElementById("loginSection").style.display = "block";
+    document.getElementById("adminSection").style.display = "none";
+    
+    // إغلاق السايد بار تلقائياً
+    toggleSidebar();
+}
+
 function displayInbox(){
-
-    const inbox =
-        document.getElementById("inbox");
-
-    const records =
-        JSON.parse(
-            localStorage.getItem("fridgeRecords")
-        ) || [];
+    const inbox = document.getElementById("inbox");
+    const records = JSON.parse(localStorage.getItem("fridgeRecords")) || [];
 
     inbox.innerHTML = "<h2>Admin Inbox</h2>";
 
     if(records.length === 0){
-
-        inbox.innerHTML +=
-            "<p>لا توجد سجلات.</p>";
-
+        inbox.innerHTML += "<p>لا توجد سجلات.</p>";
         return;
     }
 
     records.forEach(function(record,index){
-
         inbox.innerHTML += `
             <div class="card">
-
-                <strong>
-                    سجل رقم ${index + 1}
-                </strong>
-
+                <strong>سجل رقم ${index + 1}</strong> 
                 <br><br>
-
-                <b>الموظف:</b>
-                ${record.worker}
-
-                <br>
-
-                <b>رقم الحاوية:</b>
-                ${record.container}
-
-                <br>
-
-                <b>نوع الطعام:</b>
-                ${record.food}
-
-                <br>
-
-                <b>تاريخ التبريد:</b>
-                ${record.refrigerationDate}
-
-                <br>
-
-                <b>منفذ الإعدام:</b>
-                ${record.executioner}
-
-                <br>
-
-                <b>تاريخ الإعدام:</b>
-                ${record.executionDate}
-
-                <br>
-
-                <b>وقت الإدخال:</b>
-                ${record.createdAt}
-
+                <b>الموظف:</b> ${record.worker} <br>
+                <b>رقم الحاوية:</b> ${record.container} <br>
+                <b>نوع الطعام:</b> ${record.food} <br>
+                <b>تاريخ التبريد:</b> ${record.refrigerationDate} <br>
+                <b>منفذ الإعدام:</b> ${record.executioner} <br>
+                <b>تاريخ الإعدام:</b> ${record.executionDate} <br>
+                <b>وقت الإدخال:</b> ${record.createdAt}
             </div>
         `;
     });
 }
 
 function exportCSV(){
-
-    const records =
-        JSON.parse(
-            localStorage.getItem("fridgeRecords")
-        ) || [];
+    const records = JSON.parse(localStorage.getItem("fridgeRecords")) || [];
 
     if(records.length === 0){
-
         alert("لا توجد بيانات للتصدير");
-
         return;
     }
 
-    let csv =
-        "Employee,Container Number,Food Type,Refrigeration Date,Executioner,Execution Date,Entry Time\n";
+    let csv = "Employee,Container Number,Food Type,Refrigeration Date,Executioner,Execution Date,Entry Time\n";
 
     records.forEach(function(record){
-
-        csv +=
-            `"${record.worker}",` +
-            `"${record.container}",` +
-            `"${record.food}",` +
-            `"${record.refrigerationDate}",` +
-            `"${record.executioner}",` +
-            `"${record.executionDate}",` +
-            `"${record.createdAt}"\n`;
+        csv += `"${record.worker}","${record.container}","${record.food}","${record.refrigerationDate}","${record.executioner}","${record.executionDate}","${record.createdAt}"\n`;
     });
 
-    const blob =
-        new Blob(
-            [csv],
-            {
-                type:"text/csv;charset=utf-8;"
-            }
-        );
-
-    const link =
-        document.createElement("a");
-
-    link.href =
-        URL.createObjectURL(blob);
-
-    link.download =
-        "NewYorkGrill_Refrigerator_Records.csv";
-
+    const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "NewYorkGrill_Refrigerator_Records.csv";
     document.body.appendChild(link);
-
     link.click();
-
     document.body.removeChild(link);
 }
 
 setInterval(function(){
-
     if(loggedIn){
-
         displayInbox();
     }
-
 },2000);
 
 </script>
